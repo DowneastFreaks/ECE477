@@ -1,11 +1,10 @@
-+/* 
+/* 
 * lab1_src.c -- Code to print out the number of bytes and bits in each of the 
 * basic data types in C.  I opted to include the number of bits per data-type as well 
 * because in C, a byte is defined as the number of bits in the char data-type. 
 * so it is possible for there to be systems that define a non 8-bit byte. 
 * Also printed is the values in several of the limit constants. 
 * Written by Joseph Albert for ECE477 Hardware Applications of C
-* Alyssa test comment
 */
 // test
 #include <stdio.h> 
