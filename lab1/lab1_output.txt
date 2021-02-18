@@ -1,9 +1,14 @@
-char is stored in 1 bytes, which is 8 bits
+Data type sizes in bits and bytes:
+char is stored in 1 bytes, which is 8 bits
 short is stored in 2 bytes, which is 16 bits
+int_fast16_t is stored in 2 bytes, which is 16 bits
 int is stored in 4 bytes, which is 32 bits
+int_fast32_t is stored in 4 bytes, which is 32 bits
 long is stored in 4 bytes, which is 32 bits
 float is stored in 4 bytes, which is 32 bits
 double is stored in 8 bytes, which is 64 bits
+
+Datatype limit constants:
 The value of INT_MAX is 2147483647 in decimal and 7FFFFFFF in hexadecimal
 The value of UINT_MAX is 4294967295 in decimal and FFFFFFFF in hexadecimal
 The value of LONG_MAX is 2147483647 in decimal and 7FFFFFFF in hexadecimal
