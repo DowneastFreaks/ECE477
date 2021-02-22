@@ -6,7 +6,10 @@
 
 
 #include <stdio.h>
-#include <math.h>
+#include <stdbool.h>
+
+// Function Prototype
+bool get_bit(int number, int index);
 
 int main(int argc, char * argv[])
 {
@@ -18,29 +21,24 @@ int main(int argc, char * argv[])
 	{
 		
 		for (int i = 7; i >= 0; i--)
-		{
-			gate = 0;
-			if (i < 7)
-			{
-				for (int x = i + 2; x > i + 1; x--)
-					gate += (pow(2, x-1) -1);
-			}
-			else
-				gate = 255;
-			
+		{	
 
-			if ((number & gate) >> i)
-			{
+			if (get_bit(number, i))
 				printf("Turn on LED: %d\n", i+1);
-			}
 			else
 				printf("Turn off LED: %d\n", i + 1);
 			
 		}
-
 	}
 
 	return 0;
 }
 
+bool get_bit(int number, int index)
+{
+	unsigned flag = 1;
+	
+	flag = flag << index;
 
+	return number & flag;
+}
