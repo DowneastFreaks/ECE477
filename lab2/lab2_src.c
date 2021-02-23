@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <wiringPi.h>
 
 // Function Prototype
 bool get_bit(int number, int index);
@@ -15,6 +16,11 @@ int main(int argc, char * argv[])
 {
 	int number;
 	int gate;
+
+	wiringPiSetup();
+	for (int pin=0; pin <=7; pin++){
+		pinMode(pin, OUTPUT);
+	}
 	
 	
 	if (argc > 1 && sscanf(argv[1], "%i", &number))
@@ -24,9 +30,9 @@ int main(int argc, char * argv[])
 		{	
 
 			if (get_bit(number, i))
-				printf("Turn on LED: %d\n", i+1);
+				digitalWrite(i, HIGH);
 			else
-				printf("Turn off LED: %d\n", i + 1);
+				digitalWrite(i, LOW);
 			
 		}
 	}
