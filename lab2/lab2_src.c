@@ -25,15 +25,17 @@ int main(int argc, char * argv[])
 	
 	if (argc > 1 && sscanf(argv[1], "%i", &number))
 	{
-		
-		for (int i = 7; i >= 0; i--)
+		for (int count = 0; count <= number; count ++)
 		{	
-
-			if (get_bit(number, i))
+			for (int i = 7; i >= 0; i--)
+			{
+			if (get_bit(count, i))
 				digitalWrite(i, HIGH);
 			else
 				digitalWrite(i, LOW);
 			
+			}
+			delay(50);
 		}
 	}
 
