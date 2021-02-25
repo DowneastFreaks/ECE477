@@ -15,7 +15,6 @@ bool get_bit(int number, int index);
 int main(int argc, char * argv[])
 {
     int number;
-    int gate;
 
     wiringPiSetup();
 
