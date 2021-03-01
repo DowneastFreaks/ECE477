@@ -1,4 +1,5 @@
 /*
+* ECE 477 Lab 3 File input & output
 * @author Alyssa Wardwell
 * @author Joseph Albert
 *
@@ -25,10 +26,13 @@ int main(void)
     for (int pin = 0; pin <= 7; pin++)
         pinMode(pin, OUTPUT);
     
-    // set thresholds for min value for pins to turn on
+
+    /*
+    * set thresholds to the minimum value for pins to turn on
+    * uses temp_threshold to calculate the consecutively halving threshold
+    */
     for (int i=7; i >= 0; i--)
     {
-
         pin_thresholds[i] = temp_threshold; 
         temp_threshold /= 2;
     } 
@@ -44,6 +48,10 @@ int main(void)
 
         fclose(load_file);
  
+        /*
+        * loop through pins and compare actual load average value to threshold
+        * needed in order to turn pin on
+        * /
         for (int pin = 0; pin < 8; pin++)
         {
             if (load_avg >= pin_thresholds[pin])
@@ -54,6 +62,7 @@ int main(void)
         
         sleep(1);
     }
+
     return 0;
 }
 
