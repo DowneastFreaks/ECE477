@@ -8,19 +8,32 @@
 #include<wiringPi.h>
 #include<unistd.h>
 
-void turn_on_leds(int max_led);
+#define LOAD_AVG_MAX_RESOLUTION 4.0       // the min load_avg for all LEDs to be on
+
 
 int main(void)
 {
     FILE * load_file;
     char line[256];
+    float temp_threshold = LOAD_AVG_MAX_RESOLUTION;
+    float pin_thresholds[8];
     float load_avg;
 
+    // onetime setup
     // setup for pin output
     wiringPiSetup();
     for (int pin = 0; pin <= 7; pin++)
         pinMode(pin, OUTPUT);
     
+    // set thresholds for min value for pins to turn on
+    for (int i=7; i >= 0; i--)
+    {
+
+        pin_thresholds[i] = temp_threshold; 
+        temp_threshold /= 2;
+    } 
+
+
     while(1)
     {
         load_file = fopen("/proc/loadavg", "r");
@@ -29,27 +42,18 @@ int main(void)
 
         sscanf(line, "%f", &load_avg);
 
-        printf("%d", load_avg);
-
         fclose(load_file);
  
-        if (load_avg >=4)
-            turn_on_leds(8);
-        else if load_avg
+        for (int pin = 0; pin < 8; pin++)
+        {
+            if (load_avg >= pin_thresholds[pin])
+                digitalWrite(pin, HIGH);
+            else
+                digitalWrite(pin, LOW);
+        }
         
         sleep(1);
     }
     return 0;
-}
-
-void turn_on_leds(int max_led)
-{
-    for (int pin = 0; pin < 8; pin++)
-    {
-        if (pin + 1 <= max_led)
-            digitalWrite(pin, HIGH);
-        else
-            digitalWrite(pin, LOW);
-    }
 }
 
