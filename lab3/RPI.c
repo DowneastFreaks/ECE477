@@ -1,3 +1,7 @@
+/*
+* code written by Pieter Jan
+*  http://www.pieter-jan.com/node/15
+*/
 #include "RPI.h"
 
 struct peripheral gpio = {GPIO_BASE};

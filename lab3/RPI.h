@@ -1,3 +1,7 @@
+/*
+* Code written by Pieter Jan
+* http://www.pieter-jan.com/node/15
+*/
 #include<stdio.h>
 
 #include<sys/mman.h>
