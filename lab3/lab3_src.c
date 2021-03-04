@@ -5,12 +5,16 @@
 *
 */
 
+#include "RPI.h"
 #include<stdio.h>
-#include<wiringPi.h>
 #include<unistd.h>
 
 #define LOAD_AVG_MAX_RESOLUTION 4.0       // the min load_avg for all LEDs to be on
 
+void set_pin_output(int pin);
+int get_pin(int bcm_pin);
+void turn_pin_on(int pin);
+void turn_pin_off(int pin);
 
 int main(void)
 {
@@ -22,9 +26,15 @@ int main(void)
 
     // onetime setup
     // setup for pin output
-    wiringPiSetup();
+
+    if(map_peripheral(&gpio) == -1)
+    {
+        printf("Failed to map the physical GPIO registers into virtual memory space.\n");
+        return -1;
+    }
+
     for (int pin = 0; pin <= 7; pin++)
-        pinMode(pin, OUTPUT);
+        set_pin_output(pin);
     
 
     /*
@@ -55,9 +65,9 @@ int main(void)
         for (int pin = 0; pin < 8; pin++)
         {
             if (load_avg >= pin_thresholds[pin])
-                digitalWrite(pin, HIGH);
+                turn_pin_on(pin);
             else
-                digitalWrite(pin, LOW);
+                turn_pin_off(pin);
         }
         
         sleep(1);
@@ -66,3 +76,61 @@ int main(void)
     return 0;
 }
 
+void turn_pin_on(int pin)
+{
+    int bcm_pin = get_pin(pin);
+    
+    if (bcm_pin > 0)
+    {
+        GPIO_SET = 1 << bcm_pin;
+    }
+}
+
+void turn_pin_off(int pin)
+{
+    int bcm_pin = get_pin(pin);
+
+    if (bcm_pin > 0)
+    {
+        GPIO_CLR = 1 << bcm_pin;
+    }
+
+}
+
+
+void set_pin_output(int pin)
+{
+    int bcm_pin = get_pin(pin);
+
+    if (bcm_pin > 0)
+    {
+        INP_GPIO(bcm_pin);
+        OUT_GPIO(bcm_pin);
+    }
+
+}
+
+int get_pin(int bcm_pin)
+{
+    switch (bcm_pin)
+    {
+        case 0:
+            return 17;
+        case 1:
+            return 18;
+        case 2:
+            return 27;
+        case 3:
+            return 22;
+        case 4:
+            return 23;
+        case 5:
+            return 24;
+        case 6:
+            return 25;
+        case 7:
+            return 4;
+        default:
+            return -1;
+    }
+}
