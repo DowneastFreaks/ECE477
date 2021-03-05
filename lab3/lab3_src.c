@@ -82,6 +82,9 @@ void turn_pin_on(int pin)
     
     if (bcm_pin > 0)
     {
+        // each bit corresponds to a pin, when the bit is on the pin turns on
+        // setting the bit to 0 does not shut off the pin instead set a 1 to
+        // the respective bit in the GPIO_CLR register
         GPIO_SET = 1 << bcm_pin;
     }
 }
@@ -104,12 +107,16 @@ void set_pin_output(int pin)
 
     if (bcm_pin > 0)
     {
+        // set pinmode as input to set bits corresponding to pin to 000
+        // OUT_GPIO then sets the first bit within the subset of the register to 1
         INP_GPIO(bcm_pin);
         OUT_GPIO(bcm_pin);
     }
 
 }
 
+// This method maps the pins to the wiringPi numbering to avoid rewiring the pi when switching between modes
+// return -1 on error
 int get_pin(int bcm_pin)
 {
     switch (bcm_pin)
