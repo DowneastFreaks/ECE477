@@ -21,7 +21,7 @@ int main(void)
     FILE * load_file;
     char line[256];
     float temp_threshold = LOAD_AVG_MAX_RESOLUTION;
-    float pin_thresholds[8];
+    float pin_thresholds[7];
     float load_avg;
 
     // onetime setup
@@ -57,12 +57,13 @@ int main(void)
         sscanf(line, "%f", &load_avg);
 
         fclose(load_file);
+        
  
         /*
         * loop through pins and compare actual load average value to threshold
         * needed in order to turn pin on
         */
-        for (int pin = 0; pin < 8; pin++)
+        for (int pin = 0; pin < 7; pin++)
         {
             if (load_avg >= pin_thresholds[pin])
                 turn_pin_on(pin);
