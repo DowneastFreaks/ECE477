@@ -23,6 +23,7 @@ typedef struct led_parameters
 
 // Function Prototype
 void init(void);
+void display_leds(unsigned char value);
 bool get_bit(int number, int index);
 bool confirm_low_signal(unsigned pin);
 LedParameters update_parameters(LedParameters param, unsigned switch_pin);
@@ -81,14 +82,8 @@ int main()
 
         led_settings = update_led_value(led_settings);
 
-    	//Display led_value
-    	for (int i = 7; i >= 0; i--)
-    	{
-    	    if (get_bit(led_settings.value, i))
-    		digitalWrite(i, HIGH);
-    	    else
-    		digitalWrite(i, LOW);
-    	}
+        display_leds(led_settings.value);
+
     	delay(led_settings.refresh_rate);
     }
 }
@@ -109,6 +104,18 @@ void init(void)
     for (int pin = 0; pin < 8; pin++)
         pinMode(pin, OUTPUT);
 }
+
+void display_leds(unsigned char value)
+{
+    for (int i = 7; i >= 0; i--)
+    {
+        if (get_bit(value, i))
+        digitalWrite(i, HIGH);
+        else
+        digitalWrite(i, LOW);
+    }
+}
+
 
 LedParameters update_parameters(LedParameters param, unsigned switch_pin)
 {
