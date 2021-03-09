@@ -40,7 +40,7 @@ void switch_a_pressed()
     if (event_triggered)
     {
         pin_a_state = 1;
-        printf("Event A Triggered\n");
+
         if (!digitalRead(SWITCH_PIN_B))
             exit(0);
     }
@@ -55,6 +55,7 @@ void switch_b_pressed()
     if (event_triggered)
     {
         pin_b_state = 1;
+
         if (!digitalRead(SWITCH_PIN_A))
             exit(0);
     }
