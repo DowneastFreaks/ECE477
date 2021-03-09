@@ -23,6 +23,7 @@ typedef struct led_parameters
 // Function Prototype
 void init(void);
 bool get_bit(int number, int index);
+bool confirm_low_signal(unsigned pin);
 LedParameters update_parameters(LedParameters param, unsigned switch_pin);
 
 // GLOBAL VARIABLES
@@ -32,18 +33,32 @@ volatile bool pin_b_state = 0;
 // Button interrupts
 void pin_a_pressed()
 {
-    pin_a_state = 1;
-    if (!digitalRead(SWITCH_PIN_B))
-        exit(0);
+    bool event_triggered = 0;
+
+    event_triggered = confirm_low_signal(SWITCH_PIN_A);
+
+    if (event_triggered)
+    {
+        pin_a_state = 1;
+        printf("Event A Triggered\n");
+        if (!digitalRead(SWITCH_PIN_B))
+            exit(0);
+    }
 }
 
 void pin_b_pressed()
 {
-    pin_b_state = 1;
-    if (!digitalRead(SWITCH_PIN_A))
-        exit(0);
-}
+    bool event_triggered;
 
+    event_triggered = confirm_low_signal(SWITCH_PIN_B);
+
+    if (event_triggered)
+    {
+        pin_b_state = 1;
+        if (!digitalRead(SWITCH_PIN_A))
+            exit(0);
+    }
+}
 
 int main()
 {
@@ -81,7 +96,6 @@ int main()
     	}
     	delay(led_settings.refresh_rate);
     }
-    
 }
 
 void init(void)
@@ -132,4 +146,28 @@ bool get_bit(int number, int index)
     flag = flag << index;
 
     return number & flag;
+}
+
+/*
+* Function to debounce signal from button
+*/
+bool confirm_low_signal(unsigned pin)
+{
+    unsigned char buffer = 0;
+    bool event_triggered = 0;
+
+    for (int i = 0; i < 16; i++)
+    {
+        buffer <<= 1;
+        buffer |= digitalRead(pin);
+
+        if (i > 7 && 0x00 == buffer)
+        {
+            return 1;
+        }
+        delay(3);
+    }
+
+    return 0;
+
 }
