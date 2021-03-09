@@ -46,7 +46,10 @@ void switch_a_pressed()
         pin_a_state = 1;
 
         if (!digitalRead(SWITCH_PIN_B))
+        {
+            display_leds(0);
             exit(0);
+        }
     }
 }
 
@@ -61,7 +64,10 @@ void switch_b_pressed()
         pin_b_state = 1;
 
         if (!digitalRead(SWITCH_PIN_A))
+        {
+            display_leds(0);
             exit(0);
+        }
     }
 }
 
