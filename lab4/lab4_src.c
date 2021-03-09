@@ -18,6 +18,7 @@ typedef struct led_parameters
 {
     bool direction;
     int refresh_rate;
+    unsigned char value;
 } LedParameters;
 
 // Function Prototype
@@ -25,6 +26,8 @@ void init(void);
 bool get_bit(int number, int index);
 bool confirm_low_signal(unsigned pin);
 LedParameters update_parameters(LedParameters param, unsigned switch_pin);
+LedParameters update_led_value(LedParameters param);
+
 
 // GLOBAL VARIABLES
 volatile bool pin_a_state = 0;
@@ -61,10 +64,10 @@ void switch_b_pressed()
     }
 }
 
+// main function
 int main()
 {
-    char led_value = 0;
-    LedParameters led_settings = {1, 1024};
+    LedParameters led_settings = {1, 1024, 0};
 
     init();
 
@@ -76,21 +79,12 @@ int main()
             led_settings = (pin_a_state) ? update_parameters(led_settings, SWITCH_PIN_A): update_parameters(led_settings, SWITCH_PIN_B);
 
 
-    	if (led_settings.direction)
-    	{
-    	    led_value <<= 1;
-    	    led_value = (led_value==0) ? 1:led_value;
-    	}
-    	else
-    	{
-    	    led_value >>= 1;
-    	    led_value = (led_value==0) ? 128:led_value;
-    	}
+        led_settings = update_led_value(led_settings);
 
     	//Display led_value
     	for (int i = 7; i >= 0; i--)
     	{
-    	    if (get_bit(led_value, i))
+    	    if (get_bit(led_settings.value, i))
     		digitalWrite(i, HIGH);
     	    else
     		digitalWrite(i, LOW);
@@ -140,6 +134,27 @@ LedParameters update_parameters(LedParameters param, unsigned switch_pin)
     return param;
 }
 
+LedParameters update_led_value(LedParameters param)
+{
+    unsigned char led_value = param.value;
+
+    if (param.direction)
+    {
+        led_value <<= 1;
+        led_value = (led_value==0) ? 1:led_value;
+    }
+    else
+    {
+        led_value >>= 1;
+        led_value = (led_value==0) ? 128:led_value;
+    }
+
+    param.value = led_value;
+
+    return param;
+
+}
+
 bool get_bit(int number, int index)
 {
     unsigned flag = 1;
@@ -155,7 +170,6 @@ bool get_bit(int number, int index)
 bool confirm_low_signal(unsigned pin)
 {
     unsigned char buffer = 0;
-    bool event_triggered = 0;
 
     for (int i = 0; i < 16; i++)
     {
