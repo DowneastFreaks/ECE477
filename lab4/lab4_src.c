@@ -5,60 +5,62 @@
 
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <wiringPi.h>
 
+// Constants
+#define SWITCH_PIN_A 23
+#define SWITCH_PIN_B 24
+
+// Structs
+typedef struct led_parameters
+{
+    bool direction;
+    int refresh_rate;
+} LedParameters;
+
 // Function Prototype
+void init(void);
 bool get_bit(int number, int index);
+LedParameters update_parameters(LedParameters param, unsigned switch_pin);
+
+// GLOBAL VARIABLES
+volatile bool pin_a_state = 0;
+volatile bool pin_b_state = 0;
+
+// Button interrupts
+void pin_a_pressed()
+{
+    pin_a_state = 1;
+    if (!digitalRead(SWITCH_PIN_B))
+        exit(0);
+}
+
+void pin_b_pressed()
+{
+    pin_b_state = 1;
+    if (!digitalRead(SWITCH_PIN_A))
+        exit(0);
+}
+
 
 int main()
 {
-    // Initialize the wiringPi Library
-    wiringPiSetup();
+    char led_value = 0;
+    LedParameters led_settings = {1, 1024};
 
-    int number;
-    const int SWITCH_A_PIN = 23;
-    const int SWITCH_B_PIN = 24;
-    int refresh_rate = 1024;
-    bool pin_state_a = 1;
-    bool pin_state_b = 1;
-    bool direction = 1;
-    char led_value = 1;
+    init();
 
-   // Read input for each button
-   pinMode(SWITCH_A_PIN, INPUT);
-   pinMode(SWITCH_B_PIN, INPUT);
-
-   pullUpDnControl(SWITCH_A_PIN, PUD_UP);
-   pullUpDnControl(SWITCH_B_PIN, PUD_UP);
-
-    for (int pin=0; pin <=7; pin++)
-        pinMode(pin, OUTPUT);
 
     while(1)
     {
-    	if (pin_state_a || (pin_state_a = digitalRead(SWITCH_A_PIN)))
-    	{
-    	    pin_state_a = digitalRead(SWITCH_A_PIN);
-    	    if (!pin_state_a && refresh_rate > 32)
-    		refresh_rate/=2;
-    	    else if (!pin_state_a)
-    		direction = !direction;
-    	}
+        // Check to update settings
+    	if (pin_a_state || pin_b_state)
+            led_settings = (pin_a_state) ? update_parameters(led_settings, SWITCH_PIN_A): update_parameters(led_settings, SWITCH_PIN_B);
 
-        if (pin_state_b || (pin_state_b = digitalRead(SWITCH_B_PIN)))
-    	{
-    	    pin_state_b = digitalRead(SWITCH_B_PIN);
-    	    if (!pin_state_b && refresh_rate < 1024)
-    		refresh_rate *=2;
-    	    else if (!pin_state_b)
-    		direction = !direction;
-    	}
 
-    	if (!pin_state_a && !pin_state_b)
-    	    return (0);
-
-    	if (direction)
+    	if (led_settings.direction)
     	{
     	    led_value <<= 1;
     	    led_value = (led_value==0) ? 1:led_value;
@@ -77,9 +79,50 @@ int main()
     	    else
     		digitalWrite(i, LOW);
     	}
-    	delay(refresh_rate);
+    	delay(led_settings.refresh_rate);
     }
     
+}
+
+void init(void)
+{
+    wiringPiSetup();
+
+    pinMode(SWITCH_PIN_A, INPUT);
+    pinMode(SWITCH_PIN_B, INPUT);
+
+    pullUpDnControl(SWITCH_PIN_A, PUD_UP);
+    pullUpDnControl(SWITCH_PIN_B, PUD_UP);
+
+    wiringPiISR(SWITCH_PIN_A, INT_EDGE_FALLING, &pin_a_pressed);
+    wiringPiISR(SWITCH_PIN_B, INT_EDGE_FALLING, &pin_b_pressed);
+
+    for (int pin = 0; pin < 8; pin++)
+        pinMode(pin, OUTPUT);
+}
+
+LedParameters update_parameters(LedParameters param, unsigned switch_pin)
+{
+    // Reset pins
+    pin_a_state = pin_b_state = 0;
+
+    if (switch_pin == SWITCH_PIN_A)
+    {
+        if (32 == param.refresh_rate)
+            param.direction = !param.direction;
+        else
+            param.refresh_rate /= 2;
+
+    }
+    else
+    {
+        if (1024 == param.refresh_rate)
+            param.direction = !param.direction;
+        else
+            param.refresh_rate *= 2;
+    }
+
+    return param;
 }
 
 bool get_bit(int number, int index)
