@@ -31,7 +31,7 @@ volatile bool pin_a_state = 0;
 volatile bool pin_b_state = 0;
 
 // Button interrupts
-void pin_a_pressed()
+void switch_a_pressed()
 {
     bool event_triggered = 0;
 
@@ -46,7 +46,7 @@ void pin_a_pressed()
     }
 }
 
-void pin_b_pressed()
+void switch_b_pressed()
 {
     bool event_triggered;
 
@@ -108,8 +108,8 @@ void init(void)
     pullUpDnControl(SWITCH_PIN_A, PUD_UP);
     pullUpDnControl(SWITCH_PIN_B, PUD_UP);
 
-    wiringPiISR(SWITCH_PIN_A, INT_EDGE_FALLING, &pin_a_pressed);
-    wiringPiISR(SWITCH_PIN_B, INT_EDGE_FALLING, &pin_b_pressed);
+    wiringPiISR(SWITCH_PIN_A, INT_EDGE_FALLING, &switch_a_pressed);
+    wiringPiISR(SWITCH_PIN_B, INT_EDGE_FALLING, &switch_b_pressed);
 
     for (int pin = 0; pin < 8; pin++)
         pinMode(pin, OUTPUT);
