@@ -3,28 +3,24 @@
 #include<time.h>
 #include<stdbool.h>
 
+// GLOBAL
+int cycles = 0;
+
 int init(void);
+void increment_cycles(void);
 
 int main(void)
 {
     int pin_state = 0;
-    int cycles = 0;
     bool cont = 1;
     int x = 0;
-    time_t start_time = time(NULL);
+
 
     init();
+    time_t start_time = time(NULL);
+
     while (cont)
     {
-        if (pin_state == 0)
-            pin_state = digitalRead(24);
-
-        if (pin_state == 1)
-        {
-            pin_state = digitalRead(24);
-            if (pin_state == 0)
-                cycles++;
-        }
 
         if ((time(NULL) - start_time) >= 10)
         {
@@ -40,6 +36,11 @@ int init()
 {
     wiringPiSetup();
     pinMode(24, INPUT);
-    
+    wiringPiISR(24, INT_EDGE_RISING, increment_cycles);
 
+}
+
+void increment_cycles(void)
+{
+    cycles++;
 }
