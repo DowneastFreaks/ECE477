@@ -18,7 +18,7 @@ int main(void)
     int sum = 0;
     int average = 0;
     char command[512];
-    unsigned char modifier = 0;
+    int modifier = 0;
     bool cont = 1;
     int x = 0;
     unsigned char clock_speeds[NUMBER_OF_MEASUREMENTS];
@@ -53,22 +53,17 @@ int main(void)
             printf("The ATMEGA88P clock is running at %dHz, which is %s\n", average, (average>100)? "too high": "too low");
 
             if (average > 100)
-            {
-                modifier += 1;
-                sprintf(command, "avrdude -C ./avrdude_gpio.conf -c pi_1 -p atmega88p -U eeprom:w:%#04X,0x01:m",modifier);
-                system(command);
-            }
-            else
-            {
                 modifier -= 1;
-                sprintf(command, "avrdude -C ./avrdude_gpio.conf -c pi_1 -p atmega88p -U eeprom:w:%#04X,0x00:m", modifier);
-                system(command);
-            }
+            else
+                modifier += 1;
+
+            sprintf(command, "avrdude -C ./avrdude_gpio.conf -c pi_1 -p atmega88p -U eeprom:w:%#04X,%#04X:m", abs(modifier), (modifier < 0)? 1:0);
+            system(command);
             
         }
         else printf("Average is 100Hz!!\n");
 
-    if (modifier > 10)
+    if (abs(modifier) > 10)
     {
         printf("dangerous modifier range\n");
         exit(0);
