@@ -1,25 +1,62 @@
+#include <avr/interrupt.h>
 #include <avr/io.h>
 #include <avr/eeprom.h>
+#include <stdio.h>
+#include <avr/sleep.h>
 #include <string.h>
-#define FOSC 8000000
+#define F_CPU 8000000UL
+#include <util/delay.h>
 #define BAUD 9600
-#define MYUBRR FOSC/16/BAUD-1
+#define MYUBRR F_CPU/16/BAUD-1
 
+void init(void);
+void init_adc(void);
+int read_adc(void);
 void USART_Init(unsigned int ubrr);
 void update_clock_speed(void);
-void USART_Transmit(unsigned char data);
-void USART_Putchar(char * str);
+int serial_putchar(char, FILE *);
+int serial_getchar(FILE *);
+static FILE serial_stream = FDEV_SETUP_STREAM(serial_putchar, serial_getchar, _FDEV_SETUP_RW);
+
 
 
 void main(void)
 {
-    update_clock_speed();
-    USART_Init(MYUBRR);
+    char buffer[100] = "Not Start";
+    int adc_voltage = 0;
+
+    init();
+
+    while(strncmp("Start", buffer, strlen("Start"))!=0) fgets(buffer, 100, stdin);
 
     while(1)
     {
-        USART_Putchar("test");
+        adc_voltage = read_adc();
+        printf("The power rail is approximately %.6fV", (0x400 * 1.1)/ adc_voltage);
+        _delay_ms(1000);
     }
+}
+
+void init()
+{
+    update_clock_speed();
+    USART_Init(MYUBRR);
+    init_adc();
+    _delay_ms(1000);
+}
+
+void init_adc()
+{
+
+    ADMUX = ((1<<REFS0) | 0xE);   //  use AVCC as ref voltage and measure 1.1V rail
+    ADCSRA = (1<<ADEN) | (6 << ADPS0);  //  Enable ADC with prescaler = 64
+}
+
+int read_adc()
+{
+    ADCSRA |= (1<<ADSC);
+    while (ADSCA & (1<<ADSC));
+    return ADC;
 }
 
 void USART_Init(unsigned int ubrr)
@@ -33,22 +70,23 @@ void USART_Init(unsigned int ubrr)
     UCSR0B = (1<<RXEN0)|(1<<TXEN0);
     /* Set frame format: 8data, 2stop bit */
     UCSR0C = (1<<USBS0)|(3<<UCSZ00);
+
+    stdin = &serial_stream;
+    stdout = &serial_stream;
 }
 
-void USART_Transmit(unsigned char data)
+int serial_getchar(FILE * fp)
 {
-    while (!(UCSR0A & (1<<UDRE0)));
+    while(!(UCSR0A&(1<<RXC0)));
 
-    UDR0 = data;
+    return UDR0;
 }
 
-void USART_Putchar(char * str)
+int serial_putchar(char val, FILE * fp)
 {
-    while (*str)
-    {
-        USART_Transmit(*str);
-        str++;
-    }
+    while (!(UCSR0A & (1 << UDRE0)));
+    UDR0 = val;
+    return 0;
 }
 
 void update_clock_speed(void)
