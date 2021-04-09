@@ -16,23 +16,23 @@ void USART_Init(unsigned int ubrr);
 void update_clock_speed(void);
 int serial_putchar(char, FILE *);
 int serial_getchar(FILE *);
+
 static FILE serial_stream = FDEV_SETUP_STREAM(serial_putchar, serial_getchar, _FDEV_SETUP_RW);
 
 
 
 void main(void)
 {
-    char buffer[100] = "Not Start";
+    char buffer[100] = "notStart";
     int adc_voltage = 0;
 
     init();
-
     while(strncmp("Start", buffer, strlen("Start"))!=0) fgets(buffer, 100, stdin);
 
     while(1)
     {
         adc_voltage = read_adc();
-        printf("The power rail is approximately %.6fV", (0x400 * 1.1)/ adc_voltage);
+        printf("The power rail is approximately %.6fV\n\r", (0x400 * 1.1)/ adc_voltage);
         _delay_ms(1000);
     }
 }
@@ -55,7 +55,7 @@ void init_adc()
 int read_adc()
 {
     ADCSRA |= (1<<ADSC);
-    while (ADSCA & (1<<ADSC));
+    while (ADCSRA & (1<<ADSC));
     return ADC;
 }
 
@@ -65,6 +65,7 @@ void USART_Init(unsigned int ubrr)
 
     UBRR0H = (unsigned char) (ubrr>>8);
     UBRR0L = (unsigned char) ubrr;
+    UCSR0A = 0;
 
     /* Enable receiver and transmitter */
     UCSR0B = (1<<RXEN0)|(1<<TXEN0);
@@ -77,7 +78,7 @@ void USART_Init(unsigned int ubrr)
 
 int serial_getchar(FILE * fp)
 {
-    while(!(UCSR0A&(1<<RXC0)));
+    while((UCSR0A & (1<<RXC0)) == 0);
 
     return UDR0;
 }

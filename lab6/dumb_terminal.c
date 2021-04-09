@@ -37,7 +37,8 @@ int init(void);
 
 void from_to(int f1, int f2)
 {  char c;
-   while(1) if(read(f1,&c,1))write(f2,&c,1);  }
+   while(1) if(read(f1,&c,1))write(f2,&c,1);
+}
 
   int  init()
   {
@@ -45,7 +46,7 @@ void from_to(int f1, int f2)
     struct termios tc;                // terminal control structure
 
     //todo serial port should not be hard coded
-    fd1 = open("/dev/serial1", O_RDWR|O_NOCTTY);  // really ought to check for error
+    fd1 = open("/dev/ttyS0", O_RDWR|O_NOCTTY);  // really ought to check for error
     tcgetattr(fd1, &tc);
     tc.c_iflag = IGNPAR;
     tc.c_oflag = 0;
@@ -59,4 +60,3 @@ void from_to(int f1, int f2)
     tcsetattr(fd1, TCSANOW, &tc);
   return fd1;
  }
-
