@@ -47,7 +47,7 @@ void init_adc()
 {
 
     ADMUX = ((3<<REFS0) | 1 << MUX3);   //  use 1.1V as ref voltage and measure ADC8
-    ADCSRA = (1<<ADEN) | (6 << ADPS0);  //  Enable ADC with prescaler = 64
+    ADCSRA = (1<<ADEN) | 0x07;  //  Enable ADC with prescaler = 128
     DIDR0 = 0;
     ADCSRB = 0;
 }
@@ -56,7 +56,7 @@ int read_adc()
 {
     ADCSRA |= (1<<ADSC);
     while (ADCSRA & (1<<ADSC));
-    return (ADCH<<8)+ADCL;
+    return ADC;
 }
 
 void USART_Init(unsigned int ubrr)

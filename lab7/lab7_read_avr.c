@@ -2,7 +2,6 @@
 #include <wiringSerial.h>
 #include <errno.h>
 #include <string.h>
-#include <time.h>
 
 int main()
 {
@@ -11,7 +10,6 @@ int main()
     FILE * serial_fp = NULL;
     FILE * log_fp = NULL;
     int reading = 0;
-    time_t current_time;
     struct tm * timeinfo;
 
     if ((fd = serialOpen("/dev/ttyS0",9600)) < 0)
@@ -24,11 +22,9 @@ int main()
 
     while (1)
     {
-        time (&current_time);
-        timeinfo = localtime (&current_time);
         fscanf(serial_fp, "ADC:%d\n\r", &reading );
         log_fp = fopen("./temperatures.dat", "a");
-        fprintf(log_fp, "%s\t%d\n\r", asctime(timeinfo),  reading);
+        fprintf(log_fp, "%d\n\r", reading);
         fclose(log_fp);
         
     }
